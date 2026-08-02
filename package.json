@@ -1,0 +1,24 @@
+{
+  "name": "jar-of-hope",
+  "version": "1.0.0",
+  "description": "Jar of Hope - Web3 Wishlist Platform",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server -p 3000",
+    "test": "echo \"No tests specified\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qinthautumn-design/Jar-of-Hope.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qinthautumn-design/Jar-of-Hope/issues"
+  },
+  "homepage": "https://github.com/qinthautumn-design/Jar-of-Hope#readme",
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
+  }
+}
