@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jar of Hope — Preview</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  --bg: #0a0118;
+  --bg-card: rgba(255, 255, 255, 0.055);
+  --bg-card-hover: rgba(255, 255, 255, 0.095);
+  --hairline: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --text: #f4f2ff;
+  --text-muted: #a9a3d6;
+  --gold: #c4b5fd;
+  --gold-dim: rgba(196, 181, 253, 0.45);
+  --teal: #2dd4bf;
+  --danger: #fb7185;
+  --accent-2: #22d3ee;
+  --accent-3: #f472b6;
+  --accent-gradient: linear-gradient(135deg, #a78bfa 0%, #60a5fa 35%, #22d3ee 70%, #f472b6 100%);
+  --shadow-color: rgba(124, 58, 237, 0.35);
+  --font-display: 'Fraunces', serif;
+  --font-heading: 'Space Grotesk', 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+[data-theme='light'] {
+  --bg: #f6f4ff;
+  --bg-card: rgba(255, 255, 255, 0.66);
+  --bg-card-hover: rgba(255, 255, 255, 0.88);
+  --hairline: rgba(124, 58, 237, 0.16);
+  --glass-border: rgba(124, 58, 237, 0.22);
+  --text: #1e1b3a;
+  --text-muted: #6b6394;
+  --gold: #7c3aed;
+  --gold-dim: rgba(124, 58, 237, 0.35);
+  --teal: #0d9488;
+  --danger: #dc2626;
+  --accent-2: #0891b2;
+  --accent-3: #db2777;
+  --shadow-color: rgba(124, 58, 237, 0.16);
+}
+* { box-sizing: border-box; }
+html, body {
+  padding: 0; margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--font-body); -webkit-font-smoothing: antialiased;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease);
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.page { min-height: 100vh; position: relative; overflow-x: hidden; background: var(--bg); }
+
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+.demo-banner {
+  position: relative; z-index: 5; text-align: center; font-family: var(--font-mono); font-size: 0.72rem;
+  color: #0a0118; background: var(--accent-gradient); padding: 7px 12px; font-weight: 600;
+}
+
+.navbar {
+  position: sticky; top: 0; z-index: 20; background: rgba(10, 1, 24, 0.55);
+  backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-bottom: 1px solid var(--glass-border); box-shadow: 0 4px 24px rgba(124, 58, 237, 0.08);
+}
+[data-theme='light'] .navbar { background: rgba(246, 244, 255, 0.65); }
+.navbar-inner { max-width: 880px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center;
+  justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand { font-family: var(--font-heading); font-weight: 600; font-size: 1.3rem; letter-spacing: 0.01em;
+  display: flex; gap: 8px; }
+.brand-mark { background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.nav-links { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+.nav-link {
+  font-size: 0.88rem; font-weight: 500; color: var(--text-muted); padding: 8px 14px; border-radius: 999px;
+  transition: color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
+  cursor: pointer; border: none; background: none; font-family: var(--font-body);
+}
+.nav-link:hover { color: var(--text); background: var(--bg-card); transform: translateY(-1px); }
+.nav-link.active { color: var(--gold); background: linear-gradient(135deg, rgba(167,139,250,0.18), rgba(34,211,238,0.12));
+  box-shadow: inset 0 0 0 1px rgba(196,181,253,0.35); }
+
+.navbar-actions { display: flex; align-items: center; gap: 8px; }
+.theme-btn {
+  width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-card); backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+  color: var(--gold); border-radius: 10px; cursor: pointer; font-size: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: border-color 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.theme-btn:hover { border-color: var(--gold); transform: translateY(-2px) rotate(8deg);
+  box-shadow: 0 6px 18px var(--shadow-color), inset 0 1px 0 rgba(255,255,255,0.15); }
+.wallet-btn {
+  font-family: var(--font-mono); font-size: 0.78rem; font-weight: 500; background: var(--bg-card);
+  backdrop-filter: blur(10px); border: 1px solid var(--glass-border); color: var(--text);
+  padding: 9px 16px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease), transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.wallet-btn:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--shadow-color), inset 0 1px 0 rgba(255,255,255,0.15); }
+.wallet-btn.connected { color: var(--teal); border-color: var(--teal);
+  box-shadow: 0 0 0 1px rgba(45,212,191,0.25), 0 6px 18px rgba(45,212,191,0.18); }
+
+.starfield { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.hero { position: relative; z-index: 1; padding: 88px 24px 64px; text-align: center; }
+.hero-eyebrow {
+  display: inline-block; font-family: var(--font-mono); font-size: 0.72rem; color: var(--gold);
+  letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 22px; padding: 7px 16px;
+  border-radius: 999px; background: var(--bg-card); backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border); box-shadow: 0 4px 16px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+.hero h1 {
+  font-family: var(--font-heading); font-weight: 600; font-size: clamp(2.1rem, 5.2vw, 3.6rem);
+  line-height: 1.15; margin: 0 0 20px;
+  background: linear-gradient(135deg, #ffffff 10%, #d7cfff 45%, #a78bfa 75%, #22d3ee 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+[data-theme='light'] .hero h1 {
+  background: linear-gradient(135deg, #1e1b3a 10%, #4c3d9e 45%, #7c3aed 75%, #0891b2 100%);
+  -webkit-background-clip: text; background-clip: text;
+}
+.hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 480px; margin: 0 auto 32px; line-height: 1.65; }
+.hero-ctas { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+.btn {
+  font-family: var(--font-body); font-weight: 600; font-size: 0.9rem; padding: 13px 26px;
+  border-radius: 14px; border: 1px solid transparent; cursor: pointer;
+  transition: transform 0.18s var(--ease), box-shadow 0.25s var(--ease), filter 0.2s var(--ease);
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent-gradient); color: #0a0118;
+  box-shadow: 0 6px 20px rgba(124,58,237,0.35), 0 2px 8px rgba(34,211,238,0.2), inset 0 1px 0 rgba(255,255,255,0.35); }
+.btn-primary:hover { transform: translateY(-3px); filter: brightness(1.08);
+  box-shadow: 0 10px 30px rgba(124,58,237,0.45), 0 4px 14px rgba(34,211,238,0.28), inset 0 1px 0 rgba(255,255,255,0.4); }
+.btn-secondary { background: var(--bg-card); backdrop-filter: blur(10px); border-color: var(--glass-border); color: var(--text);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.08); }
+.btn-secondary:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-3px);
+  box-shadow: 0 8px 24px var(--shadow-color), inset 0 1px 0 rgba(255,255,255,0.12); }
+
+.section-header { position: relative; z-index: 1; padding: 24px 0 26px; display: flex; align-items: baseline;
+  justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.section-header h2 { font-family: var(--font-heading); font-weight: 600; font-size: 1.55rem; margin: 0; }
+.section-header .count { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); }
+
+.wish-list { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 16px; padding-bottom: 56px; }
+.wish-card {
+  background: var(--bg-card); backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid var(--glass-border); border-radius: 20px; padding: 24px 26px; position: relative;
+  box-shadow: 0 8px 28px rgba(124,58,237,0.1), 0 2px 8px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: border-color 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.3s var(--ease);
+}
+.wish-card::before { content: ''; position: absolute; top: 22px; left: -1px; width: 3px; height: calc(100% - 44px);
+  border-radius: 2px; background: var(--star-glow, var(--hairline)); box-shadow: 0 0 16px var(--star-glow, transparent); }
+.wish-card:hover { border-color: var(--gold-dim); transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(124,58,237,0.18), 0 4px 14px rgba(34,211,238,0.1), inset 0 1px 0 rgba(255,255,255,0.1); }
+
+.wish-body { display: flex; gap: 18px; align-items: flex-start; }
+.wish-icon {
+  flex-shrink: 0; width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center;
+  justify-content: center; font-size: 1.45rem; position: relative;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(0,0,0,0.2);
+  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.wish-icon::after { content: ''; position: absolute; top: 4px; left: 6px; width: 60%; height: 40%; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,255,255,0.55), transparent 70%); pointer-events: none; }
+.wish-card:hover .wish-icon { transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -3px 6px rgba(0,0,0,0.22); }
+.wish-content { flex: 1; min-width: 0; }
+.wish-message { font-family: var(--font-display); font-style: italic; font-size: 1.15rem; line-height: 1.5; margin: 0 0 16px; }
+.wish-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.wish-meta-left { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono);
+  font-size: 0.76rem; color: var(--text-muted); flex-wrap: wrap; }
+.wish-address { color: var(--accent-2); }
+.wish-actions { display: flex; gap: 8px; }
+.pill-btn {
+  font-family: var(--font-mono); font-size: 0.76rem; background: var(--bg-card); backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border); color: var(--text-muted); padding: 7px 14px; border-radius: 999px;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease), transform 0.18s var(--ease), box-shadow 0.2s var(--ease);
+}
+.pill-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); transform: translateY(-2px);
+  box-shadow: 0 6px 16px var(--shadow-color); }
+.pill-btn.voted { border-color: var(--teal); color: var(--teal); background: rgba(45,212,191,0.1);
+  box-shadow: 0 0 0 1px rgba(45,212,191,0.2), 0 4px 14px rgba(45,212,191,0.15); }
+.pill-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.form-card {
+  position: relative; z-index: 1; background: var(--bg-card); backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid var(--glass-border);
+  border-radius: 22px; padding: 34px; max-width: 560px; margin: 0 auto 56px;
+  box-shadow: 0 10px 34px rgba(124,58,237,0.12), inset 0 1px 0 rgba(255,255,255,0.07);
+}
+.form-label { font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.08em; display: block; margin-bottom: 10px; }
+textarea.form-input {
+  width: 100%; min-height: 120px; background: rgba(0,0,0,0.15); border: 1px solid var(--hairline);
+  border-radius: 14px; color: var(--text); font-family: var(--font-display); font-style: italic;
+  font-size: 1.05rem; padding: 16px; resize: vertical; line-height: 1.5;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+[data-theme='light'] textarea.form-input { background: rgba(255,255,255,0.5); }
+textarea.form-input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(196,181,253,0.18); }
+.char-count { font-family: var(--font-mono); font-size: 0.74rem; color: var(--text-muted); text-align: right; margin-top: 6px; }
+.form-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+.price-note { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); }
+.price-note strong { color: var(--gold); }
+
+.leaderboard-row {
+  display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 16px; padding: 17px 22px;
+  background: var(--bg-card); backdrop-filter: blur(16px) saturate(150%); border: 1px solid var(--glass-border);
+  border-radius: 16px; box-shadow: 0 6px 20px rgba(124,58,237,0.08), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: transform 0.22s var(--ease), box-shadow 0.25s var(--ease), border-color 0.22s var(--ease);
+}
+.leaderboard-row:hover { transform: translateY(-3px); border-color: var(--gold-dim);
+  box-shadow: 0 12px 30px rgba(124,58,237,0.16), inset 0 1px 0 rgba(255,255,255,0.1); }
+.rank { font-family: var(--font-mono); font-size: 0.9rem; color: var(--gold-dim); }
+.rank.top { color: var(--gold); font-weight: 600; }
+.leaderboard-address { font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent-2); }
+.leaderboard-amount { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text); }
+
+.empty-state { position: relative; z-index: 1; text-align: center; padding: 64px 24px; color: var(--text-muted); }
+.empty-state p:first-child { font-family: var(--font-display); font-style: italic; font-size: 1.3rem; color: var(--text); margin-bottom: 10px; }
+
+footer.site-footer { position: relative; z-index: 1; text-align: center; padding: 32px 24px 56px;
+  font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.navbar, .wish-card, .leaderboard-row, .form-card, .theme-btn, .wallet-btn, .pill-btn,
+.btn-secondary, .nav-link, .hero-eyebrow, textarea.form-input, .tip-input {
+  transition-property: background-color, background, border-color, color, box-shadow, transform, filter;
+  transition-duration: 0.4s;
+  transition-timing-function: var(--ease);
+}
+[data-theme='dark'] .btn-primary {
+  box-shadow: 0 6px 20px rgba(124,58,237,0.4), 0 0 24px rgba(34,211,238,0.25), inset 0 1px 0 rgba(255,255,255,0.35);
+}
+[data-theme='dark'] .btn-primary:hover {
+  box-shadow: 0 10px 30px rgba(124,58,237,0.5), 0 0 34px rgba(34,211,238,0.35), inset 0 1px 0 rgba(255,255,255,0.4);
+}
+[data-theme='dark'] .wallet-btn.connected { box-shadow: 0 0 0 1px rgba(45,212,191,0.3), 0 0 18px rgba(45,212,191,0.35); }
+[data-theme='dark'] .pill-btn.voted { box-shadow: 0 0 0 1px rgba(45,212,191,0.25), 0 0 16px rgba(45,212,191,0.3); }
+
+@media (max-width: 640px) {
+  .navbar-inner { padding: 12px 16px; }
+  .nav-links { order: 3; width: 100%; justify-content: center; }
+  .hero { padding: 56px 20px 44px; }
+  .hero h1 { font-size: clamp(1.8rem, 8vw, 2.3rem); }
+  .form-card { padding: 24px 20px; }
+  .wish-card { padding: 20px 18px; }
+  .leaderboard-row { grid-template-columns: 30px 1fr auto; padding: 13px 16px; gap: 10px; }
+  .page::before, .page::after { width: 260px; height: 260px; filter: blur(60px); }
+}
+@media (max-width: 420px) {
+  .wish-icon { width: 42px; height: 42px; font-size: 1.2rem; border-radius: 12px; }
+  .wish-body { gap: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="demo-banner" id="demoBanner">Not connected · click "Connect Wallet" to read/write on-chain data</div>
+  <canvas class="starfield" id="stars" aria-hidden="true"></canvas>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="brand">Jar<span class="brand-mark">of Hope</span></div>
+      <div class="nav-links">
+        <button class="nav-link active" data-view="home">Home</button>
+        <button class="nav-link" data-view="create">Create Wish</button>
+        <button class="nav-link" data-view="wishes">Wish Board</button>
+        <button class="nav-link" data-view="trending">Trending</button>
+        <button class="nav-link" data-view="leaderboard">Leaderboard</button>
+      </div>
+      <div class="navbar-actions">
+        <button class="theme-btn" id="soundBtn" aria-label="Toggle sound" title="Sound on">🔊</button>
+        <button class="theme-btn" id="themeBtn" aria-label="Toggle theme" title="Light mode">☀</button>
+        <button class="wallet-btn" id="walletBtn">Connect Wallet</button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="view active" id="view-home">
+      <section class="hero">
+        <div class="hero-eyebrow">many wishes recorded on-chain</div>
+        <h1>Write your wish.<br />Let others bring it to life.</h1>
+        <p>Every wish is stored permanently on the blockchain. Other wallets can vote for their favorites or send tips directly to the wisher without going through a contract.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-primary" onclick="showView('create')">Create Wish — 0.001 BOT</button>
+          <button class="btn btn-secondary" onclick="showView('wishes')">View All Wishes</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="view" id="view-create">
+      <section class="hero" style="padding-bottom:8px;">
+        <div class="hero-eyebrow">create a new wish</div>
+        <h1 style="font-size:2.2rem;">What's your wish?</h1>
+      </section>
+      <div class="form-card">
+        <label class="form-label" for="wishInput">Your wish</label>
+        <textarea id="wishInput" class="form-input" placeholder="I hope…" maxlength="200"></textarea>
+        <div class="char-count" id="charCount">200 characters remaining</div>
+        <div class="form-footer">
+          <span class="price-note">Posting fee: <strong id="wishPriceLabel">0.001 BOT</strong></span>
+          <button class="btn btn-primary" id="sendWishBtn">Send Wish</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="view" id="view-wishes">
+      <div class="container">
+        <div class="section-header"><h2>All Wishes</h2><span class="count">recorded wishes</span></div>
+        <div class="wish-list" id="wishListAll"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-trending">
+      <div class="container">
+        <div class="section-header"><h2>Trending</h2><span class="count">sorted by votes</span></div>
+        <div class="wish-list" id="wishListTrending"></div>
+      </div>
+    </div>
+
+    <div class="view" id="view-leaderboard">
+      <div class="container">
+        <div class="section-header"><h2>Top Tipped</h2><span class="count">see how much people get</span></div>
+        <div class="wish-list" id="leaderboardList"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">Jar of Hope · on-chain wishes, tips &amp; votes</footer>
+</div>
+
+<script>
+// ---- Sky system: crossfade from dark (stars + moon + particles) to light (clouds + sun) ----
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let width = 0, height = 0;
+let stars = [], particles = [], clouds = [];
+let mix = document.documentElement.getAttribute('data-theme') === 'light' ? 1 : 0;
+let mixFrom = mix, mixTarget = mix, transitionStart = 0;
+const TRANSITION_MS = 420;
+function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2; }
+
+function buildScene() {
+  const area = width * height;
+  stars = Array.from({ length: Math.floor(area / 9000) }, () => ({
+    x: Math.random()*width, y: Math.random()*height, r: Math.random()*1.1+0.3,
+    phase: Math.random()*Math.PI*2, speed: Math.random()*0.0015+0.0006,
+  }));
+  particles = Array.from({ length: 14 }, () => ({
+    x: Math.random()*width, y: Math.random()*height, r: Math.random()*1.8+1,
+    dx: (Math.random()-0.5)*0.12, dy: (Math.random()-0.5)*0.08,
+    phase: Math.random()*Math.PI*2, hue: Math.random() > 0.5 ? '167,139,250' : '34,211,238',
+  }));
+  const cloudCount = Math.max(4, Math.floor(width / 340));
+  clouds = Array.from({ length: cloudCount }, (_, i) => {
+    const dir = i % 2 === 0 ? 1 : -1;
+    return {
+      x: Math.random()*width, y: height*(0.08+Math.random()*0.32),
+      scale: 0.7+Math.random()*0.9, speed: (0.12+Math.random()*0.14)*dir,
+      depth: 0.4+Math.random()*0.8, opacity: 0.45+Math.random()*0.3,
+    };
+  });
+}
+function resize() {
+  width = window.innerWidth; height = window.innerHeight;
+  canvas.width = width; canvas.height = height;
+  buildScene();
+}
+function lerpColor(a, b, t) {
+  return [Math.round(a[0]+(b[0]-a[0])*t), Math.round(a[1]+(b[1]-a[1])*t), Math.round(a[2]+(b[2]-a[2])*t)];
+}
+function drawSky(m) {
+  const darkTop=[15,9,33], darkBottom=[5,3,15], lightTop=[176,219,255], lightBottom=[255,255,255];
+  const top = lerpColor(darkTop, lightTop, m), bottom = lerpColor(darkBottom, lightBottom, m);
+  const grad = ctx.createLinearGradient(0, 0, 0, height);
+  grad.addColorStop(0, `rgb(${top.join(',')})`);
+  grad.addColorStop(1, `rgb(${bottom.join(',')})`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, width, height);
+}
+function drawAmbientOrbs(t, darkAlpha) {
+  if (darkAlpha <= 0.01) return;
+  const bob = prefersReducedMotion ? 0 : Math.sin(t*0.00006)*24;
+  const spots = [
+    { x: width*0.08, y: height*0.05+bob, r: 340, c: '167,139,250' },
+    { x: width*0.95, y: height*0.15-bob, r: 300, c: '34,211,238' },
+    { x: width*0.5, y: height*1.0+bob*0.5, r: 320, c: '244,114,182' },
+  ];
+  for (const s of spots) {
+    const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
+    g.addColorStop(0, `rgba(${s.c}, ${0.16*darkAlpha})`);
+    g.addColorStop(1, `rgba(${s.c}, 0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, width, height);
+  }
+}
+function drawStars(t, darkAlpha) {
+  if (darkAlpha <= 0.01) return;
+  for (const s of stars) {
+    const twinkle = prefersReducedMotion ? 0.7 : 0.5+0.5*Math.sin(t*s.speed*6+s.phase);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(228, 221, 255, ${(0.18+twinkle*0.55)*darkAlpha})`;
+    ctx.fill();
+  }
+}
+function drawParticles(t, darkAlpha) {
+  if (darkAlpha <= 0.01) return;
+  for (const p of particles) {
+    if (!prefersReducedMotion) {
+      p.x += p.dx; p.y += p.dy;
+      if (p.x < -10) p.x = width+10; if (p.x > width+10) p.x = -10;
+      if (p.y < -10) p.y = height+10; if (p.y > height+10) p.y = -10;
+    }
+    const twinkle = prefersReducedMotion ? 0.6 : 0.5+0.5*Math.sin(t*0.0012+p.phase);
+    const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*5);
+    glow.addColorStop(0, `rgba(${p.hue}, ${0.55*twinkle*darkAlpha})`);
+    glow.addColorStop(1, `rgba(${p.hue}, 0)`);
+    ctx.fillStyle = glow;
+    ctx.fillRect(p.x-p.r*5, p.y-p.r*5, p.r*10, p.r*10);
+  }
+}
+function drawMoon(darkAlpha) {
+  if (darkAlpha <= 0.01) return;
+  const cx = width*0.86, cy = height*0.16, r = Math.min(46, width*0.045);
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r*4.2);
+  glow.addColorStop(0, `rgba(226, 232, 255, ${0.35*darkAlpha})`);
+  glow.addColorStop(1, 'rgba(226, 232, 255, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(cx-r*4.2, cy-r*4.2, r*8.4, r*8.4);
+  ctx.save();
+  ctx.globalAlpha = darkAlpha;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI*2);
+  const body = ctx.createRadialGradient(cx-r*0.3, cy-r*0.3, r*0.1, cx, cy, r);
+  body.addColorStop(0, '#fdfbff');
+  body.addColorStop(1, '#c9c3e8');
+  ctx.fillStyle = body;
+  ctx.fill();
+  ctx.restore();
+}
+function drawSun(t, lightAlpha) {
+  if (lightAlpha <= 0.01) return;
+  const cx = width*0.9, cy = height*0.1;
+  const pulse = prefersReducedMotion ? 0 : Math.sin(t*0.0009)*0.05;
+  const r = Math.min(220, width*0.22)*(1+pulse);
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  glow.addColorStop(0, `rgba(255, 244, 214, ${0.55*lightAlpha})`);
+  glow.addColorStop(0.4, `rgba(255, 224, 160, ${0.28*lightAlpha})`);
+  glow.addColorStop(1, 'rgba(255, 224, 160, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(cx-r, cy-r, r*2, r*2);
+}
+function drawCloud(cx, cy, scale, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  const lobes = [[0,0,40],[34,6,30],[-32,8,28],[14,-16,26],[-14,-12,24]];
+  for (const [dx, dy, r] of lobes) {
+    ctx.beginPath();
+    ctx.arc(cx+dx*scale, cy+dy*scale, r*scale, 0, Math.PI*2);
+    const g = ctx.createRadialGradient(cx+dx*scale, cy+dy*scale, 0, cx+dx*scale, cy+dy*scale, r*scale);
+    g.addColorStop(0, 'rgba(255,255,255,0.95)');
+    g.addColorStop(1, 'rgba(255,255,255,0.55)');
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
+  ctx.restore();
+}
+function drawClouds(lightAlpha, scrollY) {
+  if (lightAlpha <= 0.01) return;
+  for (const c of clouds) {
+    if (!prefersReducedMotion) {
+      c.x += c.speed;
+      const margin = 140*c.scale;
+      if (c.speed > 0 && c.x-margin > width) c.x = -margin;
+      if (c.speed < 0 && c.x+margin < 0) c.x = width+margin;
+    }
+    const parallaxY = c.y + scrollY*0.025*c.depth;
+    drawCloud(c.x, parallaxY, c.scale, c.opacity*lightAlpha);
+  }
+}
+function frame(now) {
+  const target = document.documentElement.getAttribute('data-theme') === 'light' ? 1 : 0;
+  if (target !== mixTarget) { mixFrom = mix; mixTarget = target; transitionStart = now; }
+  if (prefersReducedMotion) {
+    mix = mixTarget;
+  } else if (mix !== mixTarget) {
+    const elapsed = now - transitionStart;
+    const p = Math.min(1, elapsed / TRANSITION_MS);
+    mix = mixFrom + (mixTarget - mixFrom) * easeInOutCubic(p);
+  }
+  const darkAlpha = 1-mix, lightAlpha = mix;
+  const scrollY = window.scrollY || 0;
+  ctx.clearRect(0, 0, width, height);
+  drawSky(mix);
+  drawAmbientOrbs(now, darkAlpha);
+  drawSun(now, lightAlpha);
+  drawClouds(lightAlpha, scrollY);
+  drawStars(now, darkAlpha);
+  drawParticles(now, darkAlpha);
+  drawMoon(darkAlpha);
+  requestAnimationFrame(frame);
+}
+resize();
+window.addEventListener('resize', resize);
+requestAnimationFrame(frame);
+
+// ---- Sound effects (Web Audio API, no files required) ----
+let audioCtx = null;
+let muted = false;
+function getCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone({ freq, start, duration, type = 'sine', gain = 0.14 }) {
+  const ctx2 = getCtx();
+  const osc = ctx2.createOscillator();
+  const g = ctx2.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, ctx2.currentTime + start);
+  g.gain.setValueAtTime(0, ctx2.currentTime + start);
+  g.gain.linearRampToValueAtTime(gain, ctx2.currentTime + start + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx2.currentTime + start + duration);
+  osc.connect(g);
+  g.connect(ctx2.destination);
+  osc.start(ctx2.currentTime + start);
+  osc.stop(ctx2.currentTime + start + duration + 0.05);
+}
+function playWishSent() { if (!muted) [523.25,659.25,783.99,1046.5].forEach((f,i) => tone({freq:f,start:i*0.09,duration:0.35,type:'sine',gain:0.12})); }
+function playVote() { if (!muted) tone({ freq: 1318.5, start: 0, duration: 0.25, type: 'triangle', gain: 0.14 }); }
+function playTip() { if (!muted) { tone({freq:880,start:0,duration:0.12,type:'square',gain:0.07}); tone({freq:1318.5,start:0.08,duration:0.3,type:'sine',gain:0.12}); } }
+function playToggle() { if (!muted) tone({ freq: 440, start: 0, duration: 0.15, type: 'sine', gain: 0.08 }); }
+
+const soundBtn = document.getElementById('soundBtn');
+soundBtn.addEventListener('click', () => {
+  muted = !muted;
+  soundBtn.textContent = muted ? '🔇' : '🔊';
+  soundBtn.title = muted ? 'Sound off' : 'Sound on';
+});
+
+// ---- Theme toggle ----
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.toggle('active', l.dataset.view === name));
+}
+document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => showView(l.dataset.view)));
+
+const themeBtn = document.getElementById('themeBtn');
+themeBtn.addEventListener('click', () => {
+  playToggle();
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  themeBtn.textContent = next === 'dark' ? '☀' : '☾';
+  themeBtn.title = next === 'dark' ? 'Light mode' : 'Dark mode';
+});
+
+// =====================================================================
+// ON-CHAIN INTEGRATION (ethers.js v6)
+// =====================================================================
+
+// TODO: isi alamat kontrak WishBoard setelah deploy
+const CONTRACT_ADDRESS = "0xc8f2870f1c00A4c75856D9FC7643D792E3dd920d";
+
+const CONTRACT_ABI = [
+  "function wishPrice() view returns (uint256)",
+  "function owner() view returns (address)",
+  "function getWishCount() view returns (uint256)",
+  "function getWish(uint256 index) view returns (address wisher, string message, uint256 timestamp, uint256 voteCount)",
+  "function hasVotedFor(uint256 wishIndex, address voter) view returns (bool)",
+  "function totalTipped(uint256) view returns (uint256)",
+  "function tipperTotal(address) view returns (uint256)",
+  "function makeWish(string message) payable",
+  "function voteWish(uint256 wishIndex)",
+  "function tipWish(uint256 wishIndex) payable",
+  "function withdraw()",
+  "event WishMade(uint256 indexed wishIndex, address indexed wisher, string message, uint256 timestamp)",
+  "event WishVoted(uint256 indexed wishIndex, address indexed voter, uint256 newVoteCount)",
+  "event WishTipped(uint256 indexed wishIndex, address indexed tipper, address indexed wisher, uint256 amount)"
+];
+
+let provider, signer, contract, contractRead;
+let userAddress = null;
+let wishPriceWei = null;
+
+const walletBtn = document.getElementById('walletBtn');
+const demoBanner = document.getElementById('demoBanner');
+
+function shortAddr(a) { return a.slice(0, 6) + '…' + a.slice(-4); }
+
+async function connectWallet() {
+  if (!window.ethereum) {
+    alert('MetaMask (or another wallet extension) not detected. Please install one to continue.');
+    return;
+  }
+  try {
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    signer = await provider.getSigner();
+    userAddress = await signer.getAddress();
+    contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+    contractRead = contract;
+
+    walletBtn.textContent = shortAddr(userAddress);
+    walletBtn.classList.add('connected');
+    demoBanner.textContent = 'Connected as ' + shortAddr(userAddress) + ' · reading live data from the contract';
+
+    await loadWishPrice();
+    await loadAllWishes();
+    listenToContractEvents();
+  } catch (err) {
+    console.error(err);
+    alert('Failed to connect wallet: ' + (err.message || err));
+  }
+}
+
+walletBtn.addEventListener('click', () => {
+  if (!userAddress) connectWallet();
+});
+
+// Read-only provider so data loads even before the wallet is connected
+async function getReadContract() {
+  if (contractRead) return contractRead;
+  if (window.ethereum) {
+    const readProvider = new ethers.BrowserProvider(window.ethereum);
+    contractRead = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, readProvider);
+    return contractRead;
+  }
+  return null;
+}
+
+async function loadWishPrice() {
+  try {
+    const c = await getReadContract();
+    if (!c) return;
+    wishPriceWei = await c.wishPrice();
+    const label = ethers.formatEther(wishPriceWei) + ' BOT';
+    document.getElementById('wishPriceLabel').textContent = label;
+    document.querySelectorAll('.hero-ctas .btn-primary')[0] &&
+      (document.querySelectorAll('.hero-ctas .btn-primary')[0].textContent = 'Create Wish — ' + label);
+  } catch (err) {
+    console.error('Failed to load wishPrice:', err);
+  }
+}
+
+// Load every wish from the contract and re-render the lists
+async function loadAllWishes() {
+  const c = await getReadContract();
+  if (!c || CONTRACT_ADDRESS.startsWith('0xPASTE')) return;
+  try {
+    const count = await c.getWishCount();
+    const n = Number(count);
+    const wishes = [];
+    for (let i = 0; i < n; i++) {
+      const w = await c.getWish(i);
+      const tipped = await c.totalTipped(i);
+      wishes.push({
+        index: i,
+        msg: w.message,
+        addr: shortAddr(w.wisher),
+        fullAddr: w.wisher,
+        time: new Date(Number(w.timestamp) * 1000).toLocaleString(),
+        votes: Number(w.voteCount),
+        tipped: ethers.formatEther(tipped)
+      });
+    }
+    renderWishes(wishes);
+    renderLeaderboard(wishes);
+    document.querySelectorAll('.count')[0] && (document.querySelectorAll('.count')[0].textContent = n + ' recorded');
+    document.querySelector('.hero-eyebrow').textContent = n + ' wishes recorded on-chain';
+  } catch (err) {
+    console.error('Failed to load wishes:', err);
+  }
+}
+
+function listenToContractEvents() {
+  if (!contract) return;
+  contract.on('WishMade', () => loadAllWishes());
+  contract.on('WishVoted', () => loadAllWishes());
+  contract.on('WishTipped', () => loadAllWishes());
+}
+
+// ---- Wish theming (mirrors lib/wishImagery.js) ----
+const CATEGORIES = [
+  { label: 'kesehatan', emoji: '🩺', gradient: 'linear-gradient(135deg, #d97878, #b23b3b)', keywords: ['sembuh','sehat','sakit','obat','dokter','rumah sakit','pemulihan','operasi'] },
+  { label: 'cinta', emoji: '💞', gradient: 'linear-gradient(135deg, #f2a6c6, #d9789f)', keywords: ['cinta','jodoh','pacar','nikah','kawin','sayang','hati','pasangan'] },
+  { label: 'keluarga', emoji: '👪', gradient: 'linear-gradient(135deg, #e8b86d, #b9793b)', keywords: ['ibu','ayah','keluarga','anak','adik','kakak','orang tua','nenek','kakek'] },
+  { label: 'karier', emoji: '💼', gradient: 'linear-gradient(135deg, #5ec8b8, #2e8577)', keywords: ['kerja','karir','karier','interview','gaji','promosi','resign','usaha','bisnis','kantor','wawancara'] },
+  { label: 'pendidikan', emoji: '🎓', gradient: 'linear-gradient(135deg, #8b93e8, #4a52b0)', keywords: ['sekolah','kuliah','lulus','ujian','skripsi','belajar','wisuda','beasiswa'] },
+  { label: 'keuangan', emoji: '💰', gradient: 'linear-gradient(135deg, #f0cf8e, #b9793b)', keywords: ['uang','kaya','hutang','nabung','tabungan','investasi','cicilan','modal'] },
+  { label: 'perjalanan', emoji: '✈️', gradient: 'linear-gradient(135deg, #7ec8e3, #3a7ca5)', keywords: ['jalan-jalan','liburan','pindah','wisata','negeri','kota','pulang kampung','merantau'] },
+  { label: 'hewan', emoji: '🐾', gradient: 'linear-gradient(135deg, #a3d9a5, #4f9e6e)', keywords: ['kucing','anjing','hewan','peliharaan','kelinci','burung'] },
+  { label: 'rumah', emoji: '🏠', gradient: 'linear-gradient(135deg, #d9b98a, #8a6a44)', keywords: ['rumah','tempat tinggal','kontrakan','kos','renovasi'] },
+  { label: 'spiritual', emoji: '🙏', gradient: 'linear-gradient(135deg, #b39ddb, #6a4c93)', keywords: ['tuhan','doa','berkah','iman','allah','puasa','ibadah'] },
+  { label: 'proyek', emoji: '💻', gradient: 'linear-gradient(135deg, #7fd8d8, #2a9d9d)', keywords: ['proyek','coding','aplikasi','github','kode','startup','developer'] },
+];
+const DEFAULT_CATEGORY = { label: 'harapan', emoji: '🌠', gradient: 'linear-gradient(135deg, #a78bfa, #22d3ee)' };
+function getWishTheme(message) {
+  const text = message.toLowerCase();
+  for (const cat of CATEGORIES) if (cat.keywords.some(kw => text.includes(kw))) return cat;
+  return DEFAULT_CATEGORY;
+}
+
+// ---- Placeholder data (shown only until the contract is connected) ----
+const sampleWishes = [
+  { index: null, msg: "Connect your wallet to load real wishes from the contract…", addr: "—", time: "", votes: 0, tipped: "0" },
+];
+
+function glowFor(votes) {
+  const intensity = Math.min(1, Math.log2(votes + 1) / 6);
+  const alpha = 0.3 + intensity * 0.7;
+  return `rgba(167, 139, 250, ${alpha.toFixed(2)})`;
+}
+
+function wishCardHTML(w) {
+  const theme = getWishTheme(w.msg);
+  const tipLine = parseFloat(w.tipped) > 0 ? `<span>·</span><span>${w.tipped} BOT tipped</span>` : '';
+  const idxAttr = w.index !== null ? `data-index="${w.index}"` : '';
+  return `
+    <div class="wish-card" style="--star-glow:${glowFor(w.votes)}" ${idxAttr}>
+      <div class="wish-body">
+        <div class="wish-icon" style="background:${theme.gradient}" title="${theme.label}">${theme.emoji}</div>
+        <div class="wish-content">
+          <p class="wish-message">"${w.msg}"</p>
+          <div class="wish-meta">
+            <div class="wish-meta-left">
+              <span class="wish-address">${w.addr}</span>
+              <span>·</span><span>${w.time}</span>
+              ${tipLine}
+            </div>
+            <div class="wish-actions">
+              <button class="pill-btn vote-btn" data-index="${w.index}" data-votes="${w.votes}">✦ <span class="vote-count">${w.votes}</span> vote</button>
+              <button class="pill-btn tip-btn" data-index="${w.index}">♦ tip</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderWishes(wishes) {
+  document.getElementById('wishListAll').innerHTML = wishes.map(wishCardHTML).join('');
+  document.getElementById('wishListTrending').innerHTML = [...wishes].sort((a, b) => b.votes - a.votes).map(wishCardHTML).join('');
+}
+
+function renderLeaderboard(wishes) {
+  // Aggregate tips per wisher address from the loaded wishes
+  const totals = {};
+  wishes.forEach(w => {
+    const amt = parseFloat(w.tipped) || 0;
+    if (amt <= 0 || !w.fullAddr) return;
+    totals[w.fullAddr] = (totals[w.fullAddr] || 0) + amt;
+  });
+  const tippers = Object.entries(totals)
+    .map(([addr, total]) => ({ addr: shortAddr(addr), total: total.toFixed(4) }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 10);
+
+  document.getElementById('leaderboardList').innerHTML = tippers.length
+    ? tippers.map((t, i) => `
+      <div class="leaderboard-row">
+        <span class="rank ${i < 3 ? 'top' : ''}">${String(i + 1).padStart(2, '0')}</span>
+        <span class="leaderboard-address">${t.addr}</span>
+        <span class="leaderboard-amount">${t.total} BOT</span>
+      </div>`).join('')
+    : '<p style="color:var(--text-muted)">No tips recorded yet.</p>';
+}
+
+// Initial render with placeholder until wallet connects
+renderWishes(sampleWishes);
+renderLeaderboard(sampleWishes);
+// Try loading real data immediately if a wallet provider already exists (read-only)
+loadWishPrice();
+loadAllWishes();
+
+// ---- Character counter ----
+const wishInput = document.getElementById('wishInput');
+const charCount = document.getElementById('charCount');
+wishInput.addEventListener('input', () => {
+  const remaining = 200 - wishInput.value.length;
+  charCount.textContent = remaining + ' characters remaining';
+});
+
+// ---- Interactive event handlers (now calling the real contract) ----
+document.getElementById('sendWishBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('sendWishBtn');
+  const message = wishInput.value.trim();
+
+  if (!contract || !signer) { alert('Please connect your wallet first.'); return; }
+  if (!message) { alert('Wish cannot be empty.'); return; }
+  if (message.length > 200) { alert('Wish must be 200 characters or fewer.'); return; }
+
+  const original = btn.textContent;
+  try {
+    btn.disabled = true;
+    btn.textContent = 'Confirm in wallet…';
+    const price = wishPriceWei ?? await contract.wishPrice();
+    const tx = await contract.makeWish(message, { value: price });
+    btn.textContent = 'Sending…';
+    await tx.wait();
+    playWishSent();
+    btn.textContent = 'Wish sent ✦';
+    wishInput.value = '';
+    charCount.textContent = '200 characters remaining';
+    await loadAllWishes();
+  } catch (err) {
+    console.error(err);
+    alert('Transaction failed: ' + (err.reason || err.message || err));
+  } finally {
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1400);
+  }
+});
+
+document.addEventListener('click', async (e) => {
+  const voteBtn = e.target.closest('.vote-btn');
+  if (voteBtn && !voteBtn.disabled) {
+    if (!contract || !signer) { alert('Please connect your wallet first.'); return; }
+    const index = voteBtn.dataset.index;
+    if (index === 'null' || index === undefined) return;
+    try {
+      voteBtn.disabled = true;
+      const tx = await contract.voteWish(index);
+      await tx.wait();
+      playVote();
+      voteBtn.classList.add('voted');
+      await loadAllWishes();
+    } catch (err) {
+      console.error(err);
+      alert('Vote failed: ' + (err.reason || err.message || err));
+      voteBtn.disabled = false;
+    }
+    return;
+  }
+  const tipBtn = e.target.closest('.tip-btn');
+  if (tipBtn) {
+    if (!contract || !signer) { alert('Please connect your wallet first.'); return; }
+    const index = tipBtn.dataset.index;
+    if (index === 'null' || index === undefined) return;
+    const amount = prompt('How much BOT would you like to tip?', '0.01');
+    if (!amount) return;
+    try {
+      const original = tipBtn.innerHTML;
+      tipBtn.innerHTML = 'Confirm…';
+      const tx = await contract.tipWish(index, { value: ethers.parseEther(amount) });
+      await tx.wait();
+      playTip();
+      tipBtn.innerHTML = '♦ sent';
+      await loadAllWishes();
+      setTimeout(() => { tipBtn.innerHTML = original; }, 1200);
+    } catch (err) {
+      console.error(err);
+      alert('Tip failed: ' + (err.reason || err.message || err));
+    }
+  }
+});
+</script>
+</body>
+</html>
